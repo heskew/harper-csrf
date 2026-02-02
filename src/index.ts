@@ -34,9 +34,18 @@
  */
 
 import { timingSafeEqual as cryptoTimingSafeEqual } from 'node:crypto';
+import type { Scope } from 'harperdb';
+
+// Configuration type
+interface CsrfConfig {
+	tokenLength: number;
+	headerName: string;
+	bodyField: string;
+	sessionKey: string;
+}
 
 // Configuration (can be overridden via plugin config)
-let config = {
+let config: CsrfConfig = {
 	tokenLength: 32,
 	headerName: 'x-csrf-token',
 	bodyField: '_csrf',
@@ -44,10 +53,94 @@ let config = {
 };
 
 /**
+ * Expand environment variable in a string value
+ *
+ * If the value is a string in the format `${VAR_NAME}`, it will be replaced
+ * with the value of the environment variable. Non-string values are returned unchanged.
+ *
+ * @example
+ * expandEnvVar('${MY_VAR}') // Returns process.env.MY_VAR or '${MY_VAR}' if undefined
+ * expandEnvVar('literal')   // Returns 'literal'
+ * expandEnvVar(123)         // Returns 123
+ */
+export function expandEnvVar(value: any): any {
+	if (typeof value === 'string' && value.startsWith('${') && value.endsWith('}')) {
+		const envVar = value.slice(2, -1);
+		const envValue = process.env[envVar];
+		return envValue !== undefined ? envValue : value;
+	}
+	return value;
+}
+
+/**
+ * Expand environment variables in a config object
+ */
+function expandConfigEnvVars(options: Record<string, any>): Record<string, any> {
+	const expanded: Record<string, any> = {};
+	for (const [key, value] of Object.entries(options)) {
+		expanded[key] = expandEnvVar(value);
+	}
+	return expanded;
+}
+
+/**
  * Configure the CSRF plugin. Called by Harper when loading the plugin.
  */
-export function configure(options: Partial<typeof config>): void {
-	config = { ...config, ...options };
+export function configure(options: Partial<CsrfConfig>): void {
+	const expanded = expandConfigEnvVars(options);
+	config = { ...config, ...expanded };
+}
+
+/**
+ * Harper plugin entry point with runtime config change support
+ *
+ * This function is called by Harper when the plugin is loaded and provides
+ * access to the scope object for watching configuration changes.
+ */
+export function handleApplication(scope: Scope): void {
+	const logger = scope.logger;
+	let isInitialized = false;
+
+	/**
+	 * Update CSRF configuration from scope options
+	 */
+	function updateConfiguration(): void {
+		const rawOptions = (scope.options.getAll() || {}) as Record<string, any>;
+		const options = expandConfigEnvVars(rawOptions);
+
+		// Parse tokenLength if it's a string (from env var)
+		if (typeof options.tokenLength === 'string') {
+			options.tokenLength = parseInt(options.tokenLength, 10) || 32;
+		}
+
+		// Merge with defaults
+		config = {
+			tokenLength: options.tokenLength ?? 32,
+			headerName: options.headerName ?? 'x-csrf-token',
+			bodyField: options.bodyField ?? '_csrf',
+			sessionKey: options.sessionKey ?? 'csrfToken',
+		};
+
+		if (isInitialized) {
+			logger?.info?.('CSRF configuration updated:', config);
+		} else {
+			logger?.info?.('CSRF plugin loaded with config:', config);
+			isInitialized = true;
+		}
+	}
+
+	// Initial configuration
+	updateConfiguration();
+
+	// Watch for configuration changes
+	scope.options.on('change', () => {
+		updateConfiguration();
+	});
+
+	// Clean up on scope close
+	scope.on('close', () => {
+		logger?.info?.('CSRF plugin shutting down');
+	});
 }
 
 /**
