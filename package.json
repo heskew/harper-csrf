@@ -1,6 +1,6 @@
 {
 	"name": "harper-csrf",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "CSRF protection plugin for Harper applications",
 	"type": "module",
 	"main": "dist/index.js",
@@ -17,7 +17,7 @@
 		"test": "npm run build && node --import ./test/setup.js --test test/*.test.js",
 		"test:watch": "node --import ./test/setup.js --test --watch test/*.test.js",
 		"test:coverage": "npm run build && node --enable-source-maps --import ./test/setup.js --test --experimental-test-coverage test/*.test.js",
-				"lint": "eslint . --ignore-pattern 'dist/**'",
+		"lint": "eslint . --ignore-pattern 'dist/**'",
 		"format": "prettier .",
 		"format:check": "prettier --check .",
 		"format:write": "prettier --write .",
