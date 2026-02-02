@@ -19,4 +19,5 @@ jobs:
       - name: Socket Security
         uses: SocketDev/action@4337a545deecc20f19a909e52db7a2f6ba292f42 # v1.2.0
         with:
+          mode: firewall-free
           api-key: ${{ secrets.SOCKET_SECURITY_API_KEY }}
