@@ -56,5 +56,6 @@ Uses `@harperdb/code-guidelines` for ESLint and Prettier configuration.
 
 ## CI/CD
 
-- `.github/workflows/checks.yml` - Lint, format, test on Node 20/22/24
+- `.github/workflows/checks.yml` - Lint, format, test on Node 22/24
+- `.github/workflows/npm-publish.yml` - Publish to npm on release (OIDC auth + provenance)
 - `.github/workflows/socket.yml` - Socket.dev supply chain security
