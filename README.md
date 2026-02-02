@@ -113,7 +113,7 @@ Object with current configuration:
 
 - Session support (e.g., via `@harperdb/oauth` or custom session middleware)
 - Harper 4.7.0+
-- Node.js 20+
+- Node.js 22+
 
 ## License
 

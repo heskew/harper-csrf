@@ -17,8 +17,7 @@
 		"test": "npm run build && node --import ./test/setup.js --test test/*.test.js",
 		"test:watch": "node --import ./test/setup.js --test --watch test/*.test.js",
 		"test:coverage": "npm run build && node --enable-source-maps --import ./test/setup.js --test --experimental-test-coverage test/*.test.js",
-		"test:node-twenty": "npm run build && node --import ./test/setup.js --test test/*.test.js",
-		"lint": "eslint . --ignore-pattern 'dist/**'",
+				"lint": "eslint . --ignore-pattern 'dist/**'",
 		"format": "prettier .",
 		"format:check": "prettier --check .",
 		"format:write": "prettier --write .",
@@ -48,7 +47,7 @@
 		"harperdb": ">=4.7.0"
 	},
 	"engines": {
-		"node": ">=20"
+		"node": ">=22"
 	},
 	"files": [
 		"dist",
