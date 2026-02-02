@@ -16,7 +16,7 @@
 		"dev": "tsc --watch",
 		"test": "npm run build && node --import ./test/setup.js --test test/*.test.js",
 		"test:watch": "node --import ./test/setup.js --test --watch test/*.test.js",
-		"test:coverage": "npm run build && node --import ./test/setup.js --test --experimental-test-coverage --test-coverage-include=dist/**/*.js test/*.test.js",
+		"test:coverage": "npm run build && node --enable-source-maps --import ./test/setup.js --test --experimental-test-coverage test/*.test.js",
 		"test:node-twenty": "npm run build && node --import ./test/setup.js --test test/*.test.js",
 		"lint": "eslint . --ignore-pattern 'dist/**'",
 		"format": "prettier .",
