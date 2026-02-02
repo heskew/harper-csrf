@@ -105,14 +105,14 @@ export function validateCsrf(request: any, body?: any): void {
 	}
 
 	// Check header first
-	const headerToken = request.headers?.[config.headerName];
-	if (headerToken && timingSafeEqual(headerToken, sessionToken)) {
+	const headerToken = request.headers?.[config.headerName] as string | undefined;
+	if (headerToken && timingSafeEqual(headerToken, sessionToken as string)) {
 		return;
 	}
 
 	// Check body field
-	const bodyToken = body?.[config.bodyField];
-	if (bodyToken && timingSafeEqual(bodyToken, sessionToken)) {
+	const bodyToken = body?.[config.bodyField] as string | undefined;
+	if (bodyToken && timingSafeEqual(bodyToken, sessionToken as string)) {
 		// Remove the token from body so it doesn't pollute data
 		delete body[config.bodyField];
 		return;
@@ -137,29 +137,29 @@ export function validateCsrf(request: any, body?: any): void {
  *   }
  * }
  */
-export function withCsrfProtection<T extends new (...args: any[]) => any>(BaseClass: T): T {
+export function withCsrfProtection<T extends new (..._args: any[]) => any>(BaseClass: T): T {
 	return class extends BaseClass {
-		async post(...args: any[]) {
-			const [_target, data, request] = args;
+		async post(...args: any[]): Promise<unknown> {
+			const [, data, request] = args;
 			validateCsrf(request, data);
 			if (super.post) {
-				return super.post(...args);
+				return await super.post(...args);
 			}
 		}
 
-		async put(...args: any[]) {
-			const [_target, data, request] = args;
+		async put(...args: any[]): Promise<unknown> {
+			const [, data, request] = args;
 			validateCsrf(request, data);
 			if (super.put) {
-				return super.put(...args);
+				return await super.put(...args);
 			}
 		}
 
-		async delete(...args: any[]) {
-			const [_target, _data, request] = args;
+		async delete(...args: any[]): Promise<unknown> {
+			const [, , request] = args;
 			validateCsrf(request);
 			if (super.delete) {
-				return super.delete(...args);
+				return await super.delete(...args);
 			}
 		}
 	} as T;
@@ -182,7 +182,7 @@ function getResourceClass(): any {
 export class CsrfToken extends getResourceClass() {
 	static loadAsInstance = false;
 
-	async get(_target: string, request: any): Promise<{ token: string }> {
+	get(_target: string, request: any): { token: string } {
 		const token = getCsrfToken(request);
 		return { token };
 	}
