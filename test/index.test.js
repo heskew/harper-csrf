@@ -11,6 +11,7 @@ import {
 	handleApplication,
 	expandEnvVar,
 	CsrfToken,
+	suppressHandleApplicationWarning,
 } from '../dist/index.js';
 
 // Reset config before each test to ensure isolation
@@ -361,6 +362,10 @@ describe('CSRF Protection', () => {
 
 			assert.equal(getConfig().headerName, 'x-env-csrf');
 			delete process.env.TEST_HEADER_NAME;
+		});
+
+		it('should export suppressHandleApplicationWarning as true', () => {
+			assert.equal(suppressHandleApplicationWarning, true);
 		});
 	});
 

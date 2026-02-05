@@ -34,7 +34,12 @@
  */
 
 import { timingSafeEqual as cryptoTimingSafeEqual } from 'node:crypto';
-import type { Scope } from 'harperdb';
+// Scope type from harper - defined locally until harper v5 is published with types
+interface Scope {
+	logger?: { info?: (..._args: any[]) => void; error?: (..._args: any[]) => void };
+	options: { getAll: () => Record<string, any>; on: (_event: string, _handler: () => void) => void };
+	on: (_event: string, _handler: () => void) => void;
+}
 
 // Configuration type
 interface CsrfConfig {
@@ -105,7 +110,7 @@ export function handleApplication(scope: Scope): void {
 	 * Update CSRF configuration from scope options
 	 */
 	function updateConfiguration(): void {
-		const rawOptions = (scope.options.getAll() || {}) as Record<string, any>;
+		const rawOptions = scope.options.getAll() || {};
 		const options = expandConfigEnvVars(rawOptions);
 
 		// Parse tokenLength if it's a string (from env var)
@@ -142,6 +147,11 @@ export function handleApplication(scope: Scope): void {
 		logger?.info?.('CSRF plugin shutting down');
 	});
 }
+
+/**
+ * Suppress the "experimental API" warning for handleApplication
+ */
+export const suppressHandleApplicationWarning = true;
 
 /**
  * Generate a cryptographically secure random token
